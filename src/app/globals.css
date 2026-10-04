@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo",
+    system-ui, sans-serif;
+  --font-display: var(--font-outfit), var(--font-sans);
+
+  --color-bg: #0b0a10;
+  --color-surface: #16141e;
+  --color-surface-2: #211e2c;
+  --color-surface-3: #2c2839;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-ink: #f7f5fb;
+  --color-muted: #a39db4;
+  --color-faint: #6f6982;
+
+  --color-p1: #ff6f91;
+  --color-p2: #3fd5e8;
+  --color-good: #43e391;
+  --color-warn: #ffc65c;
+  --color-accent: #b18cff;
+}
+
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
+}
+
+html,
+body {
+  /* スワイプでのページ更新（ゲーム消失）を起きにくくする */
+  overscroll-behavior-y: none;
+}
+
+body {
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgb(177 140 255 / 0.16), transparent 60%),
+    radial-gradient(100% 50% at 100% 10%, rgb(255 111 145 / 0.12), transparent 60%),
+    var(--color-bg);
+  background-attachment: fixed;
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ブランドのグラデーション */
+.bg-brand {
+  background-image: linear-gradient(120deg, #b18cff 0%, #ff6f91 55%, #ffa45c 100%);
+}
+
+.text-brand {
+  background-image: linear-gradient(120deg, #c9adff 0%, #ff7fa0 55%, #ffb47a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes handoff {
+  0%,
+  100% {
+    transform: translateX(-18px) rotate(-8deg);
+  }
+  50% {
+    transform: translateX(18px) rotate(8deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--r, 0deg));
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.8;
+  }
+}
+
+.animate-screen {
+  animation: screen-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-pop {
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-rise {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-handoff {
+  animation: handoff 1.8s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  border-radius: 2px;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-screen,
+  .animate-pop,
+  .animate-rise,
+  .animate-handoff,
+  .animate-float {
+    animation: none;
+  }
+  .confetti-piece {
+    display: none;
+  }
+}
