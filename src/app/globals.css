@@ -41,6 +41,16 @@ body {
   background-attachment: fixed;
   color: var(--color-ink);
   -webkit-tap-highlight-color: transparent;
+  /* 長押しで文字選択やメニューが出ないようにし、アプリらしい操作感にする */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 button {

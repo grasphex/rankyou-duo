@@ -8,8 +8,16 @@ const lanAddresses = Object.values(networkInterfaces())
   .filter((n) => n && n.family === "IPv4" && !n.internal)
   .map((n) => n!.address);
 
+// iOSアプリ（Capacitor）用ビルドでは静的HTMLを out/ に書き出し、アプリに同梱する。
+// Vercel向けの通常ビルドはこれまでどおり。
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", ...lanAddresses],
+  ...(isCapacitorBuild && {
+    output: "export",
+    images: { unoptimized: true },
+  }),
 };
 
 export default nextConfig;

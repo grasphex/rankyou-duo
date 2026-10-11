@@ -18,6 +18,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { haptic } from "@/lib/native";
 
 export const RANK_TILE = [
   "bg-brand text-white shadow-[0_6px_20px_-6px_rgb(255_111_145/0.7)]",
@@ -79,7 +80,7 @@ export function RankingList({ order, onChange }: Props) {
           sensors={sensors}
           collisionDetection={closestCenter}
           modifiers={[verticalOnly]}
-          onDragStart={() => navigator.vibrate?.(8)}
+          onDragStart={() => haptic("pick")}
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={order} strategy={verticalListSortingStrategy}>

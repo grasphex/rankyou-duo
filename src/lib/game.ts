@@ -1,5 +1,6 @@
 import { questions, type Question } from "@/data/questions";
 import { scoreRanking } from "@/lib/scoring";
+import { readItem, removeItem, writeItem } from "@/lib/storage";
 
 export const TOTAL_ROUNDS = 10;
 export const STORAGE_KEY = "rankyou-duo:v2";
@@ -163,7 +164,8 @@ export function gameReducer(state: GameState, action: Action): GameState {
     }
 
     case "restore":
-      return action.state;
+      // 読み込み中にゲームが始まっていたら、そちらを優先する
+      return state === initialState ? action.state : state;
 
     case "quit":
       return { ...initialState, players: state.players, playedIds: state.playedIds };
@@ -177,9 +179,10 @@ export function averageScoreAsGuesser(records: RoundRecord[], player: PlayerInde
   return Math.round(mine.reduce((s, r) => s + r.score, 0) / mine.length);
 }
 
-export function loadState(): GameState {
+/** 保存済みの途中状態を読み込む。壊れたデータや存在しないお題は破棄する */
+export async function loadState(): Promise<GameState> {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = await readItem(STORAGE_KEY);
     if (!raw) return initialState;
     const parsed = JSON.parse(raw) as GameState;
     if (!parsed || typeof parsed.phase !== "string" || !Array.isArray(parsed.questionIds)) {
@@ -193,9 +196,9 @@ export function loadState(): GameState {
 }
 
 export function saveState(state: GameState) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ストレージが使えない環境では保存しない
-  }
+  writeItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+export function clearState() {
+  removeItem(STORAGE_KEY);
 }

@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import {
   TOTAL_ROUNDS,
   answererOf,
+  clearState,
   gameReducer,
   getQuestion,
   initialState,
   loadState,
   saveState,
+  type Action,
 } from "@/lib/game";
+import { hideSplash } from "@/lib/native";
 import { SetupScreen } from "@/components/screens/SetupScreen";
 import { IntroScreen } from "@/components/screens/IntroScreen";
 import { RankScreen } from "@/components/screens/RankScreen";
@@ -19,18 +22,35 @@ import { FinalScreen } from "@/components/screens/FinalScreen";
 
 export default function Game() {
   // サーバーとブラウザで同じ初期画面（スタート画面）を描画し、
-  // マウント後に sessionStorage から途中のゲームを復元する
+  // マウント後に保存済みの途中のゲームを復元する（iOSアプリは Preferences、Web版は sessionStorage）
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [restored, setRestored] = useState(false);
   const { phase, players, round } = state;
 
   useEffect(() => {
-    dispatch({ type: "restore", state: loadState() });
+    let cancelled = false;
+    loadState().then((saved) => {
+      if (cancelled) return;
+      dispatch({ type: "restore", state: saved });
+      setRestored(true);
+      // 復元した画面を描画してから起動画面を閉じ、スタート画面がちらつかないようにする
+      requestAnimationFrame(() => hideSplash());
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    // 復元前の初期状態で保存データを上書きしない
-    if (state !== initialState) saveState(state);
-  }, [state]);
+    // 復元が終わるまでは、初期状態で保存データを上書きしない
+    if (restored) saveState(state);
+  }, [state, restored]);
+
+  // 新しいゲーム・もう一度遊ぶ・やめる時は、前のゲームの保存データを消してから新しい状態を保存する
+  const startFresh = (action: Action) => {
+    clearState();
+    dispatch(action);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -41,11 +61,11 @@ export default function Game() {
   const answerer = answererOf(round);
 
   const quit = () => {
-    if (window.confirm("ゲームをやめてスタート画面に戻りますか？")) dispatch({ type: "quit" });
+    if (window.confirm("ゲームをやめてスタート画面に戻りますか？")) startFresh({ type: "quit" });
   };
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-[env(safe-area-inset-top)]">
       {inGame && (
         <header className="flex items-center gap-3 pt-4">
           <Progress current={round} />
@@ -69,7 +89,7 @@ export default function Game() {
         {phase === "setup" && (
           <SetupScreen
             defaultNames={players}
-            onStart={(p) => dispatch({ type: "start", players: p })}
+            onStart={(p) => startFresh({ type: "start", players: p })}
           />
         )}
 
@@ -126,8 +146,8 @@ export default function Game() {
           <FinalScreen
             players={players}
             records={state.records}
-            onPlayAgain={() => dispatch({ type: "playAgain" })}
-            onQuit={() => dispatch({ type: "quit" })}
+            onPlayAgain={() => startFresh({ type: "playAgain" })}
+            onQuit={() => startFresh({ type: "quit" })}
           />
         )}
       </main>

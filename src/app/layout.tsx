@@ -46,6 +46,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: "#0b0a10",
+  // iOSアプリではピンチ・ダブルタップでの拡大を止め、ネイティブアプリらしくする（Web版は拡大可のまま）
+  ...(process.env.CAPACITOR_BUILD === "1" && { maximumScale: 1, userScalable: false }),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

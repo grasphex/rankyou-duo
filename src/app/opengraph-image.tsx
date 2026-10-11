@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 import { LogoMark } from "./brand-art";
 
 export const alt = "RankYou Duo - 2人で遊べる価値観ランキングゲーム";
+// iOSアプリ用の静的出力（output: "export"）でもビルド時に画像を生成する
+export const dynamic = "force-static";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

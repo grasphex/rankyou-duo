@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 import { LogoMark } from "./brand-art";
 
+// iOSアプリ用の静的出力（output: "export"）でもビルド時に画像を生成する
+export const dynamic = "force-static";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 

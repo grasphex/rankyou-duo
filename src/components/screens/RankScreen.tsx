@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Question } from "@/data/questions";
 import { shuffle, type PlayerIndex } from "@/lib/game";
+import { haptic } from "@/lib/native";
 import { RankingList } from "@/components/RankingList";
 import { BottomBar, Button, CategoryBadge, PLAYER_THEME, PlayerChip, other } from "@/components/ui";
 
@@ -58,7 +59,12 @@ export function RankScreen({
       </div>
 
       <BottomBar>
-        <Button onClick={() => onSubmit(order)}>
+        <Button
+          onClick={() => {
+            haptic("confirm");
+            onSubmit(order);
+          }}
+        >
           {mode === "answer" ? "これで決定" : "予想を決定"}
         </Button>
       </BottomBar>

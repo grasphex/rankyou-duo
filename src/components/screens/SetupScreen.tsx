@@ -30,7 +30,7 @@ export function SetupScreen({
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-1 flex-col pt-6 pb-8">
+    <form onSubmit={submit} className="flex flex-1 flex-col pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <header className="flex items-center gap-2.5">
         <LogoMark />
         <span className="font-display text-xl font-extrabold tracking-tight">

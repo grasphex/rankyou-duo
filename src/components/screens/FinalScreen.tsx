@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { averageScoreAsGuesser, getQuestion, type PlayerIndex, type RoundRecord } from "@/lib/game";
 import { duoTitle } from "@/lib/scoring";
+import { getShareMethod, haptic, shareResult } from "@/lib/native";
 import { Confetti, useCountUp } from "@/components/effects";
 import { BottomBar, Button, Card, Eyebrow, Name, PLAYER_THEME, ScoreRing, other } from "@/components/ui";
 
@@ -23,6 +25,10 @@ export function FinalScreen({
   const perfects = records.filter((r) => r.score === 100).length;
   const winner: PlayerIndex | null = avgs[0] === avgs[1] ? null : avgs[0] > avgs[1] ? 0 : 1;
   const { value, done } = useCountUp(overall, 1800, 500);
+
+  useEffect(() => {
+    if (done) haptic("success");
+  }, [done]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -91,6 +97,7 @@ export function FinalScreen({
           )}
           {perfects > 0 && <span className="text-good">　完全一致 {perfects}回</span>}
         </p>
+        <ShareButton overall={overall} />
       </Card>
 
       <details className="group mt-4 rounded-[28px] bg-surface/70 px-5 py-4 ring-1 ring-line">
@@ -127,5 +134,48 @@ export function FinalScreen({
         </Button>
       </BottomBar>
     </div>
+  );
+}
+
+const SHARE_URL = "https://rankyou.grasphex.com";
+
+/** 最終結果のシェア。共有手段がないブラウザでは表示しない */
+function ShareButton({ overall }: { overall: number }) {
+  // 最終結果画面はゲーム後にブラウザ上でだけ描画されるため、初期化時に判定できる
+  const [method] = useState(getShareMethod);
+  const [copied, setCopied] = useState(false);
+
+  if (!method) return null;
+
+  const share = async () => {
+    const result = await shareResult({
+      title: "RankYou Duo",
+      text: `RankYou Duoで2人の理解度は${overall}%でした！\n相手のこと、どれだけ分かってる？`,
+      url: SHARE_URL,
+    });
+    if (result === "copied") {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="relative mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/8 px-5 text-sm font-extrabold text-ink ring-1 ring-line transition active:scale-[0.97] active:bg-white/14"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+        <path
+          d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {copied ? "コピーしました" : method === "copy" ? "結果をコピー" : "結果をシェア"}
+    </button>
   );
 }

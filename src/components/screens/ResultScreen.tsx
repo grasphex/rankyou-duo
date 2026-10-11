@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import type { Question } from "@/data/questions";
 import { TOTAL_ROUNDS, type RoundRecord } from "@/lib/game";
 import { roundVerdict, scoreRanking } from "@/lib/scoring";
+import { haptic } from "@/lib/native";
 import { Confetti, useCountUp } from "@/components/effects";
 import { BottomBar, Button, Card, CategoryBadge, Eyebrow, Name, PLAYER_THEME, ScoreRing, other } from "@/components/ui";
 
@@ -27,6 +29,11 @@ export function ResultScreen({
   const { value, done } = useCountUp(record.score);
   const verdict = roundVerdict(record.score);
   const isLast = round + 1 >= TOTAL_ROUNDS;
+
+  // スコアが出そろった瞬間に1回だけ振動させる
+  useEffect(() => {
+    if (done) haptic(record.score >= 75 ? "success" : "reveal");
+  }, [done, record.score]);
 
   return (
     <div className="flex flex-1 flex-col">
